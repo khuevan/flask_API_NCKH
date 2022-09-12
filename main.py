@@ -1,8 +1,9 @@
 import hashlib
 import datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, stream_with_context
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
+
 
 app = Flask(__name__)
 jwt = JWTManager(app)
@@ -13,7 +14,8 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["pinaapple"]
 users_collection = db["users"]
 
-@app.route("/api/users", methods=["POST"])
+
+@app.route("/api/register", methods=["POST"])
 def register():
 	new_user = request.get_json()
 	new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest() 
@@ -23,6 +25,7 @@ def register():
 		return jsonify({'msg': 'User created successfully'}), 201
 	else:
 		return jsonify({'msg': 'Username already exists'}), 409
+
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -37,6 +40,7 @@ def login():
 
 	return jsonify({'msg': 'The username or password is incorrect'}), 401
 
+
 @app.route("/api/user", methods=["GET"])
 @jwt_required
 def profile():
@@ -48,9 +52,19 @@ def profile():
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
 
-@app.route("/api/")
-def info():
-    return
+
+@app.route("/api/streamcontex", methods=['POST'])
+def camera():
+    def gen():
+        # get image from request ?
+        # process ?
+        # yield ?
+        # return ?
+        yield '?'
+        yield 'work?'
+        yield 'dunno'
+    return app.response_class(stream_with_context(gen()))
+
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run()
