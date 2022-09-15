@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from pymongo import MongoClient
 import json
 from bson.json_util import dumps, loads
+from datetime import date
 
 
 app = Flask(__name__)
@@ -51,7 +52,7 @@ def login():
 
 
 @app.route("/api/user", methods=["GET"])
-@jwt_required
+@jwt_required()
 def profile():
 	current_user = get_jwt_identity()
 	user_from_db = users_collection.find_one({'account' : current_user})
@@ -60,20 +61,6 @@ def profile():
 		return jsonify({'profile' : user_from_db }), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
-
-
-@app.route("/api/streamcontex")
-def camera():
-    def gen():
-        # get image from request ?
-        # process ?
-        # yield ? 
-        # return ?
-        yield '!'
-        yield 'work?'
-        yield 'dunno'
-
-    return app.response_class(stream_with_context(gen()))
 
 
 @app.route('/api/album-images')
@@ -122,7 +109,7 @@ def insert_discover(account, title, content, path, category, model):
 
 
 @app.route('/api/discovery/characteristics/<model>')
-def album_images(model):
+def album_characteristics(model):
 	data = []
 	for item in discovery_collection.find({'category':'characteristics', 'model': {model}}):
 		new_item = {
@@ -136,7 +123,7 @@ def album_images(model):
 
 
 @app.route('/api/discovery/<category>')
-def album_images(category):
+def category(category):
 	data = [] 
 	for item in discovery_collection.find({'category':{category}}):
 		new_item = {
@@ -148,6 +135,26 @@ def album_images(category):
 		data.append(new_item)
 
 	return jsonify(data)
+
+
+@app.route('/api/detect_image', methods=['POST'])
+@jwt_required()
+def detect_img():
+	image = request.files.get('image')
+	is_count = request.values.get('is_count')
+	is_cutout = request.values.get('is_cutout')
+	current_user = get_jwt_identity()
+	user = users_collection.find_one({'account': user})
+	if int(user.permission) >= 0:
+		image = detect_img(image)
+		date = date.today()
+		date = date.strftime('%d/%m/%Y')
+			# fe truyền vào gì, model trả về gì
+			# img_name, date, model, class_name, accuracy, path # AI
+		insert_images(user['account'], img_name, date, model, class_name, accuracy, is_count, is_cutout, path)
+		return image
+	else:
+		return jsonify({'msg': 'no permission'}), 405
 
 
 if __name__ == '__main__':
