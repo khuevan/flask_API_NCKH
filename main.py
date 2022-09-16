@@ -190,7 +190,6 @@ def detect_img():
 		image = detect_img(image)
 		date = datetime.date.today()
 		date = date.strftime('%d/%m/%Y')
-			# fe truyền vào gì, model trả về gì
 			# img_name, date, model, class_name, accuracy, path 
 		insert_images(user['account'], img_name, date, model, class_name, accuracy, is_count, is_cutout, path)
 		return image
