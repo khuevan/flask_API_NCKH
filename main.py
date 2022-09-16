@@ -1,32 +1,63 @@
 import hashlib
+import redis
 import datetime
 from flask import Flask, request, jsonify, stream_with_context
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
 import json
 from bson.json_util import dumps, loads
-from datetime import date
+from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
 
 
 app = Flask(__name__)
 jwt = JWTManager(app)
-app.config['JWT_SECRET_KEY'] = '8Zz5tw0Ionm3XPZZfN0NOml3z9FMfmpgXwovR9fp6ryDIoGRM8EPHAB6iHsc0fb'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
 
-client = MongoClient("mongodb://localhost:27017/")
+ACCESS_EXPIRES = datetime.timedelta(hours=1)
+app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
+
+client = MongoClient(MONGODB_STRING)
+
 db = client["pinaapple"]
 users_collection = db["users"]
 images_collection = db['images']
 videos_collection = db['videos']
 discovery_collection = db['discovery']
 
+
+jwt_redis_blocklist = redis.StrictRedis(
+    host="localhost", port=5001, db=0, decode_responses=True
+)
+
+
+# Callback function to check if a JWT exists in the redis blocklist
+@jwt.token_in_blocklist_loader
+def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
+    jti = jwt_payload["jti"]
+    token_in_redis = jwt_redis_blocklist.get(jti)
+    return token_in_redis is not None
+
+
 @app.route('/')
 def index():
-    return jsonify({'msg': 'OK'}), 200
+	return jsonify({'msg': 'OK'})
 
-@app.route("/api/register", methods=["POST"])
+
+@app.route("/register", methods=["POST"])
 def register():
 	new_user = request.get_json()
+	if new_user.account is not str:
+		raise
+	examplex = {
+		'account':'',
+		'password': '',
+		'name': '',
+		"permission": '',
+		"avatar": "",
+		"email": "",
+		"phone": ""
+	}
+	
 	new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest() 
 	# new_user.update({"name": "","permission": 0,"avatar": "","email": "","phone": ""})
 	doc = users_collection.find_one({"account": new_user["account"]})
@@ -37,9 +68,11 @@ def register():
 		return jsonify({'msg': 'Username already exists'}), 409
 
 
-@app.route("/api/login", methods=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
 	login_details = request.get_json()
+	# account = request.json.get('account')
+	# password = request.json.get('password')
 	user_from_db = users_collection.find_one({'account': login_details['account']})  
 
 	if user_from_db:
@@ -51,7 +84,15 @@ def login():
 	return jsonify({'msg': 'The username or password is incorrect'}), 401
 
 
-@app.route("/api/user", methods=["GET"])
+@app.route('/logout')
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]
+    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
+    return jsonify(msg="Access token revoked")
+
+
+@app.route("/user")
 @jwt_required()
 def profile():
 	current_user = get_jwt_identity()
@@ -147,10 +188,10 @@ def detect_img():
 	user = users_collection.find_one({'account': user})
 	if int(user.permission) >= 0:
 		image = detect_img(image)
-		date = date.today()
+		date = datetime.date.today()
 		date = date.strftime('%d/%m/%Y')
 			# fe truyền vào gì, model trả về gì
-			# img_name, date, model, class_name, accuracy, path # AI
+			# img_name, date, model, class_name, accuracy, path 
 		insert_images(user['account'], img_name, date, model, class_name, accuracy, is_count, is_cutout, path)
 		return image
 	else:
@@ -158,4 +199,4 @@ def detect_img():
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0',debug=True)
+	app.run(host=HOST, port=PORT, debug=DEBUG)

@@ -1,2 +1,6 @@
 .venv
 ignore
+static
+.env
+__pycache__
+__pycache__
