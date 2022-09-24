@@ -1,3 +1,4 @@
+import os, io
 import hashlib
 import redis
 import datetime
@@ -8,7 +9,11 @@ from pymongo import MongoClient
 import json
 from bson.json_util import dumps, loads
 from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
-
+from PIL import Image
+from detect_test import main
+import numpy as np
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 app = Flask(__name__)
 jwt = JWTManager(app)
@@ -28,17 +33,17 @@ videos_collection = db['videos']
 discovery_collection = db['discovery']
 
 
-jwt_redis_blocklist = redis.StrictRedis(
-    host="localhost", port=5001, db=0, decode_responses=True
-)
+# jwt_redis_blocklist = redis.StrictRedis(
+#     host="localhost", port=5001, db=0, decode_responses=True
+
 
 
 # Callback function to check if a JWT exists in the redis blocklist
-@jwt.token_in_blocklist_loader
-def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
-    jti = jwt_payload["jti"]
-    token_in_redis = jwt_redis_blocklist.get(jti)
-    return token_in_redis is not None
+# @jwt.token_in_blocklist_loader
+# def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
+#     jti = jwt_payload["jti"]
+#     token_in_redis = jwt_redis_blocklist.get(jti)
+#     return token_in_redis is not None
 
 
 @app.route('/')
@@ -87,12 +92,12 @@ def login():
 	return jsonify({'msg': 'The username or password is incorrect'}), 401
 
 
-@app.route('/logout')
-@jwt_required()
-def logout():
-    jti = get_jwt()["jti"]
-    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
-    return jsonify(msg="Access token revoked")
+# @app.route('/logout')
+# @jwt_required()
+# def logout():
+#     jti = get_jwt()["jti"]
+#     jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
+#     return jsonify(msg="Access token revoked")
 
 
 @app.route("/user")
@@ -123,16 +128,15 @@ def album_images():
 	return jsonify(data)
 
 
-def insert_images(account, img_name, date, model, class_name, accuracy, is_count, is_cutout, path):
+def insert_images(account, img_name, date, model, list_box, function_usage, crop_path, path):
 	data = {
 		'account': account,
 		'img-name': img_name,
 		'date': date,
 		'model': model,
-		'class-name': class_name,
-		'accuracy': accuracy,
-		'is-cutout': is_cutout,
-		'is-count': is_count,
+		'list_box': list_box,
+		'function_usage': function_usage,
+		'crop_path': crop_path,
 		'path': path,
 	}
 	images_collection.insert_one(data)
@@ -181,20 +185,34 @@ def category(category):
 	return jsonify(data)
 
 
-@app.route('/api/detect_image', methods=['POST'])
+@app.route('/api/predict-image', methods=['POST'])
 @jwt_required()
-def detect_img():
-	image = request.files.get('image')
-	is_count = request.values.get('is_count')
-	is_cutout = request.values.get('is_cutout')
+def predict():
+	images = request.files.get('image')
+	is_count = True if request.values.get('is_count')=='true' else False
+	is_cutout = True if request.values.get('is_cutout')=='true' else False
+
 	current_user = get_jwt_identity()
-	user = users_collection.find_one({'account': user})
-	if int(user.permission) >= 0:
-		image = detect_img(image)
-		date = datetime.date.today()
-		date = date.strftime('%d/%m/%Y')
-			# img_name, date, model, class_name, accuracy, path 
-		insert_images(user['account'], img_name, date, model, class_name, accuracy, is_count, is_cutout, path)
+	user = users_collection.find_one({'account': current_user})
+	if int(user['permission']) >= 0:
+		for image in images:
+			print(image)
+			image = Image.open(io.BytesIO(image))
+			image = image.convert('RGB')
+			image = np.array(image)
+
+			image = detect_img(image)
+			date = datetime.date.today()
+			date = date.strftime('%d/%m/%Y')
+			data = main(
+				images='./data/images/pine.jpg',
+				dont_show=True,
+				crop=is_cutout,
+				counted=is_count,
+				model_type="Pineapple",
+				name_created=user['account'])
+
+			insert_images(user['account'], data['image'], data['data-created'], data['model_type'], data['list_box'], data['funtion'], data['crop_path'],data['path'])
 		return image
 	else:
 		return jsonify({'msg': 'no permission'}), 405
@@ -227,5 +245,5 @@ def image(data_image):
 
 
 if __name__ == '__main__':
-	# app.run(host=HOST, port=5001, debug=DEBUG)
-	socketio.run(app=app, host=HOST, port=PORT, debug=DEBUG)
+	app.run(host=HOST, port=5000, debug=DEBUG)
+	# socketio.run(app=app, host=HOST, port=PORT, debug=DEBUG)
