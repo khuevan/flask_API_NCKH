@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 env
 ```bash
 pip install -r requirements.txt
@@ -8,3 +9,8 @@ pip install -r requirements.txt
 ```python
 def a()
 ```
+=======
+# Flask-API
+Oke Văn
+hôm nay trời đẹp
+=======
