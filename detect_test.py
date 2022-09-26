@@ -82,16 +82,17 @@ def main(
 
     # loop through images in list and run Yolov4 model on each
     for count, image_path in enumerate(images, 1):
-        original_image = cv2.imread(image_path)
-
-        original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+        try:
+            original_image = cv2.imread(image_path)
+        except: pass
+        original_image = cv2.cvtColor(image_path, cv2.COLOR_BGR2RGB)
 
         image_data = cv2.resize(original_image, (input_size, input_size))
         image_data = image_data / 255.
 
         # get image name by using split method
-        image_name = image_path.split('/')[-1]
-        image_name = image_name.split('.')[0]
+        # image_name = image_path.split('/')[-1]
+        # image_name = image_name.split('.')[0]
 
         images_data = []
         for i in range(1):
@@ -165,7 +166,8 @@ def main(
             except FileExistsError:
                 pass
             crop_img = crop_objects(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox, crop_path, allowed_classes, img_name, img_pathname, img_name_folder_crop)
-
+        if len(crop_img) == 0:
+            os.rmdir(crop_path)
         # # if ocr flag is enabled, perform general text extraction using Tesseract OCR on object detection bounding box
         # if FLAGS.ocr:
         #     ocr(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox)

@@ -79,8 +79,6 @@ def register():
 @app.route("/login", methods=["POST"])
 def login():
 	login_details = request.get_json()
-	# account = request.json.get('account')
-	# password = request.json.get('password')
 	user_from_db = users_collection.find_one({'account': login_details['account']})  
 
 	if user_from_db:
@@ -205,7 +203,7 @@ def predict():
 			date = datetime.date.today()
 			date = date.strftime('%d/%m/%Y')
 			data = main(
-				images='./data/images/pine.jpg',
+				images=image,
 				dont_show=True,
 				crop=is_cutout,
 				counted=is_count,
