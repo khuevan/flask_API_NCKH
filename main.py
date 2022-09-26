@@ -1,4 +1,4 @@
-import os, io
+import os, io, cv2, json
 import hashlib
 import redis
 import datetime
@@ -6,21 +6,21 @@ from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
-import json
 from bson.json_util import dumps, loads
 from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
 from PIL import Image
 from detect_test import main
 import numpy as np
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+import cv2
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 jwt = JWTManager(app)
 socketio = SocketIO(app)
 
 
-ACCESS_EXPIRES = datetime.timedelta(hours=1)
+ACCESS_EXPIRES = datetime.timedelta(hours=2)
 app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
 
@@ -188,20 +188,20 @@ def category(category):
 @app.route('/api/predict-image', methods=['POST'])
 @jwt_required()
 def predict():
-	images = request.files.get('image')
+	images = request.files.getlist('image')
+	# print(images)
 	is_count = True if request.values.get('is_count')=='true' else False
 	is_cutout = True if request.values.get('is_cutout')=='true' else False
-
 	current_user = get_jwt_identity()
+
 	user = users_collection.find_one({'account': current_user})
 	if int(user['permission']) >= 0:
 		for image in images:
-			print(image)
+			image = image.read()
 			image = Image.open(io.BytesIO(image))
 			image = image.convert('RGB')
 			image = np.array(image)
 
-			image = detect_img(image)
 			date = datetime.date.today()
 			date = date.strftime('%d/%m/%Y')
 			data = main(
@@ -211,9 +211,10 @@ def predict():
 				counted=is_count,
 				model_type="Pineapple",
 				name_created=user['account'])
-
-			insert_images(user['account'], data['image'], data['data-created'], data['model_type'], data['list_box'], data['funtion'], data['crop_path'],data['path'])
-		return image
+			from pprint import pprint
+			pprint(data)
+			insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
+		return jsonify({'data': 'not yet'}) 
 	else:
 		return jsonify({'msg': 'no permission'}), 405
 
