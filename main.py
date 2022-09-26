@@ -1,6 +1,5 @@
 import os, io, cv2, json
 import hashlib
-import redis
 import datetime
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
@@ -31,19 +30,6 @@ users_collection = db["users"]
 images_collection = db['images']
 videos_collection = db['videos']
 discovery_collection = db['discovery']
-
-
-# jwt_redis_blocklist = redis.StrictRedis(
-#     host="localhost", port=5001, db=0, decode_responses=True
-
-
-
-# Callback function to check if a JWT exists in the redis blocklist
-# @jwt.token_in_blocklist_loader
-# def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
-#     jti = jwt_payload["jti"]
-#     token_in_redis = jwt_redis_blocklist.get(jti)
-#     return token_in_redis is not None
 
 
 @app.route('/')
@@ -88,14 +74,6 @@ def login():
 			return jsonify(access_token=access_token), 200
 
 	return jsonify({'msg': 'The username or password is incorrect'}), 401
-
-
-# @app.route('/logout')
-# @jwt_required()
-# def logout():
-#     jti = get_jwt()["jti"]
-#     jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
-#     return jsonify(msg="Access token revoked")
 
 
 @app.route("/user")
@@ -187,7 +165,7 @@ def category(category):
 @jwt_required()
 def predict():
 	images = request.files.getlist('image')
-	# print(images)
+
 	is_count = True if request.values.get('is_count')=='true' else False
 	is_cutout = True if request.values.get('is_cutout')=='true' else False
 	current_user = get_jwt_identity()
@@ -244,5 +222,5 @@ def image(data_image):
 
 
 if __name__ == '__main__':
-	app.run(host=HOST, port=5000, debug=DEBUG)
+	app.run(host=HOST, port=PORT, debug=DEBUG)
 	# socketio.run(app=app, host=HOST, port=PORT, debug=DEBUG)

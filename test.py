@@ -1,4 +1,6 @@
-import detect_test
-from pprint import pprint
-a = detect_test.main()
-pprint(a)
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+logger.info('msg')
