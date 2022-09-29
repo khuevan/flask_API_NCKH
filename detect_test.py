@@ -82,9 +82,17 @@ def main(
 
     # loop through images in list and run Yolov4 model on each
     for count, image_path in enumerate(images, 1):
+<<<<<<< HEAD
         original_image = cv2.imread(image_path)
 
         original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+=======
+        try:
+            original_image = cv2.imread(image_path)
+        except: pass
+        # original_image = cv2.cvtColor(image_path, cv2.COLOR_BGR2RGB
+        original_image = image_path 
+>>>>>>> c6936011c660d8ca8df3bab9a36bfc2e73e68073
 
         image_data = cv2.resize(original_image, (input_size, input_size))
         image_data = image_data / 255.
