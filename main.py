@@ -180,7 +180,7 @@ def predict():
 			model_type="Pineapple",
 			name_created=user['account'])
 		insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
-		del data['date-created'], data['model_type'], data['function']
+		del data['date-created'], data['model_type'], data['function'], data['user-created']
 
 		return jsonify(data), 200 
 	else:
