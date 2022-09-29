@@ -85,7 +85,8 @@ def main(
         try:
             original_image = cv2.imread(image_path)
         except: pass
-        original_image = cv2.cvtColor(image_path, cv2.COLOR_BGR2RGB)
+        # original_image = cv2.cvtColor(image_path, cv2.COLOR_BGR2RGB
+        original_image = image_path 
 
         image_data = cv2.resize(original_image, (input_size, input_size))
         image_data = image_data / 255.
