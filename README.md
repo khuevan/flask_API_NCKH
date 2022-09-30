@@ -9,7 +9,5 @@ pip install -r requirements.txt
 def a()
 ```
 =======
-# Flask-API
-Oke Văn
-hôm nay trời đẹp
+# Stupid DB
 =======

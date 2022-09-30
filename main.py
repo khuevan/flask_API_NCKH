@@ -162,7 +162,7 @@ def predict():
 
 	# is_count = True if request.values.get('is_count') == 'true' else False
 	is_count = request.values.get('is_count') == 'true'
-	is_cutout = True if request.values.get('is_cutout') == 'true' else False
+	is_cutout = request.values.get('is_cutout') == 'true'
 	current_user = get_jwt_identity()
 
 	user = users_collection.find_one({'account': current_user})
@@ -208,7 +208,8 @@ def predit_video():
 			model_type="Pineapple",
 			name_created=user['account'])
 		os.remove(video_path)
-		# insert to db
+		# insert to stupid db
+		# stupid insert
 		insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 		# from pprint import pprint
