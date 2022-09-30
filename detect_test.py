@@ -82,18 +82,25 @@ def main(
 
     # loop through images in list and run Yolov4 model on each
     for count, image_path in enumerate(images, 1):
+
+        # original_image = cv2.imread(image_path)
+
+        # original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+
         try:
             original_image = cv2.imread(image_path)
         except: 
             original_image = image_path
         # original_image = cv2.cvtColor(image_path, cv2.COLOR_BGR2RGB
 
+
+
         image_data = cv2.resize(original_image, (input_size, input_size))
         image_data = image_data / 255.
 
         # get image name by using split method
-        # image_name = image_path.split('/')[-1]
-        # image_name = image_name.split('.')[0]
+        image_name = image_path.split('/')[-1]
+        image_name = image_name.split('.')[0]
 
         images_data = []
         for i in range(1):
@@ -142,11 +149,11 @@ def main(
         list_bbox = {"Ripe": [], "Semi_Ripe": [], "Un_Ripe": []}
         for i in range(valid_detections.numpy()[0]):
             if int(classes.numpy()[0][i]) == 0:
-                list_bbox["Ripe"].append({"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
+                list_bbox["Ripe"].append({"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
             if int(classes.numpy()[0][i]) == 1:
-                list_bbox["Semi_Ripe"].append({"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
+                list_bbox["Semi_Ripe"].append({"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
             if int(classes.numpy()[0][i]) == 2:
-                list_bbox["Un_Ripe"].append({"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
+                list_bbox["Un_Ripe"].append({"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
             else: continue
 
         # read in all class names from config
@@ -167,8 +174,7 @@ def main(
             except FileExistsError:
                 pass
             crop_img = crop_objects(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox, crop_path, allowed_classes, img_name, img_pathname, img_name_folder_crop)
-        if len(crop_img) == 0:
-            os.rmdir(crop_path)
+
         # # if ocr flag is enabled, perform general text extraction using Tesseract OCR on object detection bounding box
         # if FLAGS.ocr:
         #     ocr(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox)
@@ -197,7 +203,7 @@ def main(
 
         username_id = name_created
         data = {"user-created" : username_id,
-                "date-created": datetime_now(),
+                "date-reated": datetime_now(),
                 "image": str(img_name) + '.png',
                 "path": path,
                 "list_box": list_bbox,

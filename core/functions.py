@@ -91,3 +91,32 @@ def ocr(img, data):
             print("Class: {}, Text Extracted: {}".format(class_name, text))
         except: 
             text = None
+
+def crop_objects_vid(img, data, path, allowed_classes,img_name_root,img_pathname_crop, final_path_crop):
+    boxes, scores, classes, num_objects = data
+    class_names = read_class_names(cfg.YOLO.CLASSES)
+    #create dictionary to hold count of objects for image name
+    counts = dict()
+    crop_video = []
+    for i in range(num_objects):
+        # get count of class for part of image name
+        class_index = int(classes[i])
+        class_name = class_names[class_index]
+        if class_name in allowed_classes:
+            counts[class_name] = counts.get(class_name, 0) + 1
+            # get box coords
+            xmin, ymin, xmax, ymax = boxes[i]
+            # crop detection from image (take an additional 5 pixels around all edges)
+            cropped_img = img[int(ymin)-5:int(ymax)+5, int(xmin)-5:int(xmax)+5]
+            # construct image name and join it to path for saving crop properly
+            img_name = str(img_name_root) + "_" + class_name + '_' + str(counts[class_name]) + '.png'
+            img_path = os.path.join(path, img_name)
+            # save image
+            cv2.imwrite(img_path, cropped_img)
+            crop_path = str(img_pathname_crop) + str(img_name_root) + "/" + final_path_crop + "/" + str(img_name)
+            # print(crop_path)
+            crop_video.append(crop_path)
+        else:
+            continue
+    # print(crop_video)
+    return crop_video
