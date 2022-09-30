@@ -20,7 +20,6 @@ from tensorflow.compat.v1 import InteractiveSession
 import calendar
 import time
 import datetime
-from pprint import pprint
 import collections
 # flags.DEFINE_string('framework', 'tf', '(tf, tflite, trt')
 # flags.DEFINE_string('weights', './checkpoints/yolov4-416',
@@ -199,14 +198,14 @@ def main(
             crop_rate = 20 # capture images every so many frames (ex. crop photos every 150 frames)
             crop_path = os.path.join(os.getcwd(), 'static', 'crop_videos', str(img_name))
             try:
-                os.mkdir(crop_path)
+                os.makedirs(crop_path)
             except FileExistsError:
                 pass
             if frame_num % crop_rate == 0:
                 final_path = os.path.join(crop_path, 'frame_' + str(frame_num))
                 final_path_crop = 'frame_' + str(frame_num)
-                try:
-                    os.mkdir(final_path)
+                try :
+                    os.makedirs(final_path)
                 except FileExistsError:
                     pass
                 data = crop_objects_vid(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), pred_bbox, final_path, allowed_classes,img_name,img_pathname_crop,final_path_crop)
@@ -239,14 +238,13 @@ def main(
 
     data = {"User created": name_created,
             "Date created": datetime_now(),
-            "image": img_name + ".mp4",
-            "path": output,
+            "video": output,
             "list_box": detect_folder,
             "crop_path": crop_folder,
             "model_type": model_type,
             "function": check_boolean(counted, crop)}
-    pprint(data)
-    # pprint(detect_folder)
+    # from pprint import pprint
+    # pprint(data)
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':

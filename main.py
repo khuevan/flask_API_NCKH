@@ -9,6 +9,7 @@ from bson.json_util import dumps, loads
 from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
 from PIL import Image
 from detect_test import main
+from detect_video import main
 import numpy as np
 import cv2
 from flask_cors import CORS
@@ -165,14 +166,11 @@ def predict():
 
 	user = users_collection.find_one({'account': current_user})
 	if int(user['permission']) >= 0:
-		
 		image = images[0].read()
 		image = Image.open(io.BytesIO(image))
 		image = image.convert('RGB')
 		image = np.array(image)
 
-		date = datetime.date.today()
-		date = date.strftime('%d/%m/%Y')
 		data = main(
 			images=image,
 			dont_show=True,
@@ -193,10 +191,18 @@ def predit_video():
 	current_user = get_jwt_identity()
 	video = request.files.get('video')
 
+	is_count = request.values.get('is_count') == 'true'
+	is_cutout = True if request.values.get('is_cutout') == 'true' else False
+
 	user = users_collection.find_one({'account': current_user})
 	if user['permission'] > -1:
-		pass
-		# ham predict video 
+		data = main(
+			images=image,
+			dont_show=True,
+			crop=is_cutout,
+			counted=is_count,
+			model_type="Pineapple",
+			name_created=user['account'])
 	return jsonify(''), 200
 
 
