@@ -1,6 +1,6 @@
 import os, io, cv2, json
 import hashlib
-import datetime
+from datetime import datetime
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -9,9 +9,11 @@ from bson.json_util import dumps, loads
 from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
 from PIL import Image
 from detect_test import main
+from detect_video import main
 import numpy as np
 import cv2
 from flask_cors import CORS
+
 
 
 app = Flask(__name__)
@@ -153,25 +155,23 @@ def category(category):
 	return jsonify(data), 200
 
 
-@app.route('/api/predict-image', methods=['POST'])
+@app.route('/api/predict_image', methods=['POST'])
 @jwt_required()
 def predict():
 	images = request.files.getlist('image')
 
-	is_count = True if request.values.get('is_count')=='true' else False
-	is_cutout = True if request.values.get('is_cutout')=='true' else False
+	# is_count = True if request.values.get('is_count') == 'true' else False
+	is_count = request.values.get('is_count') == 'true'
+	is_cutout = True if request.values.get('is_cutout') == 'true' else False
 	current_user = get_jwt_identity()
 
 	user = users_collection.find_one({'account': current_user})
 	if int(user['permission']) >= 0:
-		
 		image = images[0].read()
 		image = Image.open(io.BytesIO(image))
 		image = image.convert('RGB')
 		image = np.array(image)
 
-		date = datetime.date.today()
-		date = date.strftime('%d/%m/%Y')
 		data = main(
 			images=image,
 			dont_show=True,
@@ -187,32 +187,36 @@ def predict():
 		return jsonify({'msg': 'no permission'}), 405
 
 
-@socketio.on('image')
-def image(data_image):
-	sbuf = StringIO()
-	sbuf.write(data_image)
+@app.route('/api/predit_video', methods=['POST'])
+@jwt_required()
+def predit_video():
+	current_user = get_jwt_identity()
+	video = request.files.get('video')
 
-	# decode and convert into image
-	b = io.BytesIO(base64.b64decode(data_image))
-	pimg = Image.open(b)
+	is_count = request.values.get('is_count') == 'true'
+	is_cutout = True if request.values.get('is_cutout') == 'true' else False
 
-	# converting RGB to BGR, as opencv standards
-	frame = cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+	user = users_collection.find_one({'account': current_user})
+	if user['permission'] > -1:
+		video_path = 'static/album-videos/' + str(datetime.now().timestamp()) + '.mp4'
+		video = video.save(video_path)
+		data = main(
+			video=video_path,
+			dont_show=True,
+			crop=is_cutout,
+			counted=is_count,
+			model_type="Pineapple",
+			name_created=user['account'])
+		os.remove(video_path)
+		# insert to db
+		del data['date-created'], data['model_type'], data['function'], data['user-created']
+		# from pprint import pprint
+		# pprint(data)
+	return jsonify(data)
 
-	# Process the image frame
-	frame = imutils.resize(frame, width=700)
-	frame = cv2.flip(frame, 1)
-	imgencode = cv2.imencode('.jpg', frame)[1]
 
-	# base64 encode
-	stringData = base64.b64encode(imgencode).decode('utf-8')
-	b64_src = 'data:image/jpg;base64,'
-	stringData = b64_src + stringData
-
-	# emit the frame back
-	emit('response_back', stringData)
-
+# https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
 
 if __name__ == '__main__':
-	# app.run(host=HOST, port=PORT, debug=DEBUG)
-	socketio.run(app=app, host=HOST, port=PORT, debug=DEBUG)
+	app.run(host=HOST, port=PORT, debug=DEBUG)
+	# socketio.run()

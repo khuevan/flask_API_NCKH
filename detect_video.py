@@ -20,7 +20,6 @@ from tensorflow.compat.v1 import InteractiveSession
 import calendar
 import time
 import datetime
-from pprint import pprint
 import collections
 # flags.DEFINE_string('framework', 'tf', '(tf, tflite, trt')
 # flags.DEFINE_string('weights', './checkpoints/yolov4-416',
@@ -78,7 +77,7 @@ def main(
     img_name = "Pineapple-" + str(times)
     img_name_folder_crop = times
     output = output + str(img_name) + ".mp4"
-    img_pathname_crop = "./static/crop_video/"
+    img_pathname_crop = "./static/crop_videos/"
 
     config = ConfigProto()
     config.gpu_options.allow_growth = True
@@ -87,8 +86,8 @@ def main(
     input_size = size
     video_path = video
     # get video name by using split method
-    video_name = video_path.split('/')[-1]
-    video_name = video_name.split('.')[0]
+    # video_name = video_path.split('/')[-1]
+    # video_name = video_name.split('.')[0]
     if framework == 'tflite':
         interpreter = tf.lite.Interpreter(model_path=weights)
         interpreter.allocate_tensors()
@@ -173,13 +172,13 @@ def main(
             for i in range(valid_detections.numpy()[0]):
                 if int(classes.numpy()[0][i]) == 0:
                     list_bbox["Ripe"].append(
-                        {"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                        {"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
                 if int(classes.numpy()[0][i]) == 1:
                     list_bbox["Semi_Ripe"].append(
-                        {"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                        {"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
                 if int(classes.numpy()[0][i]) == 2:
                     list_bbox["Un_Ripe"].append(
-                        {"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                        {"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
                 else:
                     continue
             detect_folder[str(frame_detect)] = list_bbox
@@ -199,14 +198,14 @@ def main(
             crop_rate = 20 # capture images every so many frames (ex. crop photos every 150 frames)
             crop_path = os.path.join(os.getcwd(), 'static', 'crop_videos', str(img_name))
             try:
-                os.mkdir(crop_path)
+                os.makedirs(crop_path)
             except FileExistsError:
                 pass
             if frame_num % crop_rate == 0:
                 final_path = os.path.join(crop_path, 'frame_' + str(frame_num))
                 final_path_crop = 'frame_' + str(frame_num)
-                try:
-                    os.mkdir(final_path)
+                try :
+                    os.makedirs(final_path)
                 except FileExistsError:
                     pass
                 data = crop_objects_vid(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), pred_bbox, final_path, allowed_classes,img_name,img_pathname_crop,final_path_crop)
@@ -237,18 +236,24 @@ def main(
             out.write(result)
         if cv2.waitKey(1) & 0xFF == ord('q'): break
 
+<<<<<<< HEAD
     data = {"User created": name_created,
             "Date created": datetime_now(),
             "video": img_name + ".mp4",
             "path": output,
+=======
+    data = {"user-created": name_created,
+            "date-created": datetime_now(),
+            "video": output,
+>>>>>>> 4ee52f28f96bb569564c8d2fb39e180f536d3580
             "list_box": detect_folder,
             "crop_path": crop_folder,
             "model_type": model_type,
             "function": check_boolean(counted, crop)}
-    pprint(data)
-    # pprint(detect_folder)
+    # from pprint import pprint
+    # pprint(data)
     cv2.destroyAllWindows()
-
+    return data
 if __name__ == '__main__':
     try:
         app.run(main)
