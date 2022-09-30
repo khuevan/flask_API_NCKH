@@ -236,16 +236,9 @@ def main(
             out.write(result)
         if cv2.waitKey(1) & 0xFF == ord('q'): break
 
-<<<<<<< HEAD
-    data = {"User created": name_created,
-            "Date created": datetime_now(),
-            "video": img_name + ".mp4",
-            "path": output,
-=======
     data = {"user-created": name_created,
             "date-created": datetime_now(),
             "video": output,
->>>>>>> 4ee52f28f96bb569564c8d2fb39e180f536d3580
             "list_box": detect_folder,
             "crop_path": crop_folder,
             "model_type": model_type,
