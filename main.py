@@ -210,12 +210,17 @@ def predit_video():
 		os.remove(video_path)
 		# insert to stupid db
 		# stupid insert
+		insert_db('videos', {'account':''})
 		insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 		# from pprint import pprint
 		# pprint(data)
 	return jsonify(data)
 
+
+def insert_db(collection, data):
+	coll = db[collection]
+	coll.insert_one(data)
 
 # https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
 
