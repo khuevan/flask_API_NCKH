@@ -239,7 +239,7 @@ def main(
 
     data = {"User created": name_created,
             "Date created": datetime_now(),
-            "image": img_name + ".mp4",
+            "video": img_name + ".mp4",
             "path": output,
             "list_box": detect_folder,
             "crop_path": crop_folder,
