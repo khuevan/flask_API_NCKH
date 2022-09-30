@@ -158,8 +158,9 @@ def category(category):
 def predict():
 	images = request.files.getlist('image')
 
-	is_count = True if request.values.get('is_count')=='true' else False
-	is_cutout = True if request.values.get('is_cutout')=='true' else False
+	# is_count = True if request.values.get('is_count') == 'true' else False
+	is_count = request.values.get('is_count') == 'true'
+	is_cutout = True if request.values.get('is_cutout') == 'true' else False
 	current_user = get_jwt_identity()
 
 	user = users_collection.find_one({'account': current_user})
@@ -186,7 +187,20 @@ def predict():
 	else:
 		return jsonify({'msg': 'no permission'}), 405
 
+@app.route('/api/predit_video', methods=['POST'])
+@jwt_required()
+def predit_video():
+	current_user = get_jwt_identity()
+	video = request.files.get('video')
 
+	user = users_collection.find_one({'account': current_user})
+	if user['permission'] > -1:
+		pass
+		# ham predict video 
+	return jsonify(''), 200
+
+
+# https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
 @socketio.on('image')
 def image(data_image):
 	sbuf = StringIO()

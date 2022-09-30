@@ -84,9 +84,9 @@ def main(
     for count, image_path in enumerate(images, 1):
         try:
             original_image = cv2.imread(image_path)
-        except: pass
+        except: 
+            original_image = image_path
         # original_image = cv2.cvtColor(image_path, cv2.COLOR_BGR2RGB
-        original_image = image_path 
 
         image_data = cv2.resize(original_image, (input_size, input_size))
         image_data = image_data / 255.
