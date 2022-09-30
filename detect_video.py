@@ -77,7 +77,7 @@ def main(
     img_name = "Pineapple-" + str(times)
     img_name_folder_crop = times
     output = output + str(img_name) + ".mp4"
-    img_pathname_crop = "./static/crop_video/"
+    img_pathname_crop = "./static/crop_videos/"
 
     config = ConfigProto()
     config.gpu_options.allow_growth = True
@@ -86,8 +86,8 @@ def main(
     input_size = size
     video_path = video
     # get video name by using split method
-    video_name = video_path.split('/')[-1]
-    video_name = video_name.split('.')[0]
+    # video_name = video_path.split('/')[-1]
+    # video_name = video_name.split('.')[0]
     if framework == 'tflite':
         interpreter = tf.lite.Interpreter(model_path=weights)
         interpreter.allocate_tensors()
@@ -172,13 +172,13 @@ def main(
             for i in range(valid_detections.numpy()[0]):
                 if int(classes.numpy()[0][i]) == 0:
                     list_bbox["Ripe"].append(
-                        {"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                        {"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
                 if int(classes.numpy()[0][i]) == 1:
                     list_bbox["Semi_Ripe"].append(
-                        {"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                        {"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
                 if int(classes.numpy()[0][i]) == 2:
                     list_bbox["Un_Ripe"].append(
-                        {"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                        {"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
                 else:
                     continue
             detect_folder[str(frame_detect)] = list_bbox
@@ -236,8 +236,8 @@ def main(
             out.write(result)
         if cv2.waitKey(1) & 0xFF == ord('q'): break
 
-    data = {"User created": name_created,
-            "Date created": datetime_now(),
+    data = {"user-created": name_created,
+            "date-created": datetime_now(),
             "video": output,
             "list_box": detect_folder,
             "crop_path": crop_folder,
@@ -246,7 +246,7 @@ def main(
     # from pprint import pprint
     # pprint(data)
     cv2.destroyAllWindows()
-
+    return data
 if __name__ == '__main__':
     try:
         app.run(main)

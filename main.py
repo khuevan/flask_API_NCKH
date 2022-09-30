@@ -154,7 +154,7 @@ def category(category):
 	return jsonify(data), 200
 
 
-@app.route('/api/predict-image', methods=['POST'])
+@app.route('/api/predict_image', methods=['POST'])
 @jwt_required()
 def predict():
 	images = request.files.getlist('image')
@@ -185,6 +185,8 @@ def predict():
 	else:
 		return jsonify({'msg': 'no permission'}), 405
 
+from datetime import datetime
+
 @app.route('/api/predit_video', methods=['POST'])
 @jwt_required()
 def predit_video():
@@ -196,14 +198,21 @@ def predit_video():
 
 	user = users_collection.find_one({'account': current_user})
 	if user['permission'] > -1:
+		video_path = 'static/album-videos/' + str(datetime.now().timestamp()) + '.mp4'
+		video = video.save(video_path)
 		data = main(
-			images=image,
+			video=video_path,
 			dont_show=True,
 			crop=is_cutout,
 			counted=is_count,
 			model_type="Pineapple",
 			name_created=user['account'])
-	return jsonify(''), 200
+		os.remove(video_path)
+		# insert to db
+		del data['date-created'], data['model_type'], data['function'], data['user-created']
+		# from pprint import pprint
+		# pprint(data)
+	return jsonify(data)
 
 
 # https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
