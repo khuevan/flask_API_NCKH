@@ -209,6 +209,7 @@ def predit_video():
 			name_created=user['account'])
 		os.remove(video_path)
 		# insert to db
+		insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 		# from pprint import pprint
 		# pprint(data)
