@@ -1,6 +1,6 @@
 import os, io, cv2, json
 import hashlib
-import datetime
+from datetime import datetime
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -13,6 +13,7 @@ from detect_video import main
 import numpy as np
 import cv2
 from flask_cors import CORS
+
 
 
 app = Flask(__name__)
@@ -185,7 +186,6 @@ def predict():
 	else:
 		return jsonify({'msg': 'no permission'}), 405
 
-from datetime import datetime
 
 @app.route('/api/predit_video', methods=['POST'])
 @jwt_required()
@@ -216,32 +216,7 @@ def predit_video():
 
 
 # https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
-@socketio.on('image')
-def image(data_image):
-	sbuf = StringIO()
-	sbuf.write(data_image)
-
-	# decode and convert into image
-	b = io.BytesIO(base64.b64decode(data_image))
-	pimg = Image.open(b)
-
-	# converting RGB to BGR, as opencv standards
-	frame = cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
-
-	# Process the image frame
-	frame = imutils.resize(frame, width=700)
-	frame = cv2.flip(frame, 1)
-	imgencode = cv2.imencode('.jpg', frame)[1]
-
-	# base64 encode
-	stringData = base64.b64encode(imgencode).decode('utf-8')
-	b64_src = 'data:image/jpg;base64,'
-	stringData = b64_src + stringData
-
-	# emit the frame back
-	emit('response_back', stringData)
-
 
 if __name__ == '__main__':
-	# app.run(host=HOST, port=PORT, debug=DEBUG)
-	socketio.run(app=app, host=HOST, port=PORT, debug=DEBUG)
+	app.run(host=HOST, port=PORT, debug=DEBUG)
+	# socketio.run()
