@@ -212,6 +212,80 @@ def main(
                 "function": check_boolean(counted, crop)}
         return data
 
+
+def detect_cam(img):
+    config = ConfigProto()
+    config.gpu_options.allow_growth = True
+    session = InteractiveSession(config=config)
+    STRIDES, ANCHORS, NUM_CLASS, XYSCALE = utils.load_config(True, 'yolov4')
+    input_size = 416
+
+    # load model
+    if framework == 'tflite':
+        interpreter = tf.lite.Interpreter(model_path= weights)
+    else:
+        saved_model_loaded = tf.saved_model.load(weights, tags=[tag_constants.SERVING])
+
+    image_data = cv2.resize(img, (input_size, input_size))
+    image_data = image_data / 255.
+
+    image_data = np.asarray(images_data).astype(np.float32)
+
+
+    if framework == 'tflite':
+        interpreter.allocate_tensors()
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+        interpreter.set_tensor(input_details[0]['index'], list(image_data))
+        interpreter.invoke()
+        pred = [interpreter.get_tensor(output_details[i]['index']) for i in range(len(output_details))]
+        if model == 'yolov3' and tiny == True:
+            boxes, pred_conf = filter_boxes(pred[1], pred[0], score_threshold=0.25,
+                                            input_shape=tf.constant([input_size, input_size]))
+        else:
+            boxes, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25,
+                                            input_shape=tf.constant([input_size, input_size]))
+    else:
+        infer = saved_model_loaded.signatures['serving_default']
+        batch_data = tf.constant(list(image_data))
+        pred_bbox = infer(batch_data)
+        for key, value in pred_bbox.items():
+            boxes = value[:, :, 0:4]
+            pred_conf = value[:, :, 4:]
+
+
+    # run non max suppression on detections
+    boxes, scores, classes, valid_detections = tf.image.combined_non_max_suppression(
+        boxes=tf.reshape(boxes, (tf.shape(boxes)[0], -1, 1, 4)),
+        scores=tf.reshape(
+            pred_conf, (tf.shape(pred_conf)[0], -1, tf.shape(pred_conf)[-1])),
+        max_output_size_per_class=50,
+        max_total_size=50,
+        iou_threshold=iou,
+        score_threshold=score
+    )
+
+    # format bounding boxes from normalized ymin, xmin, ymax, xmax ---> xmin, ymin, xmax, ymax
+    original_h, original_w, _ = original_image.shape
+    bboxes = utils.format_boxes(boxes.numpy()[0], original_h, original_w)
+
+    # hold all detection data in one variable
+    pred_bbox = [bboxes, scores.numpy()[0], classes.numpy()[0], valid_detections.numpy()[0]]
+
+    # read in all class names from config
+    class_names = utils.read_class_names(cfg.YOLO.CLASSES)
+
+    # by default allow all classes in .names file
+    allowed_classes = list(class_names.values())
+
+    image = utils.draw_bbox(img, pred_bbox, False, allowed_classes=allowed_classes,
+                                    read_plate=False)
+
+    image = Image.fromarray(image.astype(np.uint8))
+  
+    return image
+
+
 if __name__ == '__main__':
     # try:
     #     app.run(main)

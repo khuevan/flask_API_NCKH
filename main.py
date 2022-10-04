@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from bson.json_util import dumps, loads
 from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
 from PIL import Image
-from detect_test import main
+from detect_test import main, detect_cam
 from detect_video import main
 import numpy as np
 import cv2
@@ -184,7 +184,7 @@ def predict():
 
 		return jsonify(data), 200 
 	else:
-		return jsonify({'msg': 'no permission'}), 405
+		return jsonify(msg='no permission'), 405
 
 
 @app.route('/api/predit_video', methods=['POST'])
@@ -223,6 +223,30 @@ def insert_db(collection, data):
 	coll.insert_one(data)
 
 # https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
+# https://github.com/liemkg1234/Websocket_FaceMaskDetection/blob/master/app.py
+@socketio.on('connect', namespace='/detect')
+def connect():
+    app.logger.info("Client da ket noi voi may chu")
+
+@socketio.on('frame_Input', namespace='/detect')
+def getImage(input): #type('str' base64URL)
+	input = input.split(",")[1]
+	image_data = input
+
+	# Base64_2_PIL
+	img_pil = base64_to_pil_image(image_data)
+	# PIL_2_CV2
+	img_cv2 = np.array(img_pil)
+
+	img = detect_cam(img_cv2)
+
+	#PIL_2_base64URL
+	image_data = pil_image_to_base64(img).decode("utf-8")
+	image_data = "data:image/jpeg;base64," + image_data
+
+	# Gui frame&class len client
+	emit('frame_Output', {'img': image_data, 'class': str_class}, namespace='/detect')
+
 
 if __name__ == '__main__':
 	app.run(host=HOST, port=PORT, debug=DEBUG)
