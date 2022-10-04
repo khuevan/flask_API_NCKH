@@ -224,10 +224,6 @@ def insert_db(collection, data):
 
 # https://github.com/dxue2012/python-webcam-flask/blob/master/app.py
 # https://github.com/liemkg1234/Websocket_FaceMaskDetection/blob/master/app.py
-@socketio.on('connect', namespace='/detect')
-def connect():
-    app.logger.info("Client da ket noi voi may chu")
-
 @socketio.on('frame_Input', namespace='/detect')
 def getImage(input): #type('str' base64URL)
 	input = input.split(",")[1]
@@ -245,9 +241,9 @@ def getImage(input): #type('str' base64URL)
 	image_data = "data:image/jpeg;base64," + image_data
 
 	# Gui frame&class len client
-	emit('frame_Output', {'img': image_data, 'class': str_class}, namespace='/detect')
+	emit('frame_Output', {'img': image_data}, namespace='/detect')
 
 
 if __name__ == '__main__':
 	# app.run(host=HOST, port=PORT, debug=DEBUG)
-	socketio.run(app)
+	socketio.run(app, host=HOST, port=PORT, debug=DEBUG)
