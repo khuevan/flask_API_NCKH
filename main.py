@@ -244,8 +244,8 @@ def getImage(input): #type('str' base64URL)
 	emit('frame_Output', {'img': image_data}, namespace='/detect')
 
 
-@app.route('/test_cam')
-def index():
+@app.route('/test')
+def test():
 	return render_template('index.html')
 
 
