@@ -4,4 +4,6 @@ ignore
 static
 .env
 venv
-templates
+templates/register.html
+templates/base.html
+templates/login.html
