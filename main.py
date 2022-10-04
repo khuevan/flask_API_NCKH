@@ -1,6 +1,6 @@
 import os, io, cv2, json
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -21,7 +21,7 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 jwt = JWTManager(app)
 socketio = SocketIO(app)
 
-ACCESS_EXPIRES = datetime.timedelta(hours=2)
+ACCESS_EXPIRES = timedelta(hours=2)
 app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
 
@@ -249,5 +249,5 @@ def getImage(input): #type('str' base64URL)
 
 
 if __name__ == '__main__':
-	app.run(host=HOST, port=PORT, debug=DEBUG)
-	# socketio.run()
+	# app.run(host=HOST, port=PORT, debug=DEBUG)
+	socketio.run(app)
