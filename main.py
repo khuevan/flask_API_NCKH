@@ -244,6 +244,11 @@ def getImage(input): #type('str' base64URL)
 	emit('frame_Output', {'img': image_data}, namespace='/detect')
 
 
+@app.route('/test_cam')
+def index():
+	return render_template('index.html')
+
+
 if __name__ == '__main__':
 	# app.run(host=HOST, port=PORT, debug=DEBUG)
 	socketio.run(app, host=HOST, port=PORT, debug=DEBUG)
