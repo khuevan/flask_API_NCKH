@@ -261,12 +261,12 @@ def detect_cam(img):
             pred_conf, (tf.shape(pred_conf)[0], -1, tf.shape(pred_conf)[-1])),
         max_output_size_per_class=50,
         max_total_size=50,
-        iou_threshold=iou,
-        score_threshold=score
+        iou_threshold=0.5,
+        score_threshold=0.5
     )
 
     # format bounding boxes from normalized ymin, xmin, ymax, xmax ---> xmin, ymin, xmax, ymax
-    original_h, original_w, _ = original_image.shape
+    original_h, original_w, _ = img.shape
     bboxes = utils.format_boxes(boxes.numpy()[0], original_h, original_w)
 
     # hold all detection data in one variable
