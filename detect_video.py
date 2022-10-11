@@ -51,7 +51,7 @@ def check_boolean(count, crop):
         else: return "Crop"
     else: return "Count"
 
-def main(
+def detect_video(
         framework='tf',
         weights='./checkpoints/yolov4-tiny-416',
         size=416,

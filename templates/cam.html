@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+	<title>Web phat hien nguoi deo khau trang</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/index.css') }}">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Pineapple Detection</h1>
+    <video autoplay id="videoElement"></video>  <canvas id="canvasElement"></canvas>
+    <img id="photo">
+
+    <script>
+        $(document).ready(function (){
+            // Tao socket de connect toi server
+            let namespace = '/detect'
+            // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            var socket = io.connect(window.location.protocol + '//' + document.domain + ':' + location.port + namespace);
+          
+            // Tao cac bien
+            let video = document.querySelector('#videoElement');
+            let canvas = document.querySelector('#canvasElement');
+            let ctx = canvas.getContext('2d');
+            photo = document.getElementById('photo');
+          
+            // Tao funcion sendsnapshot, moi chu ki (1frame/20ms) se lay 1 frame trong video va gui ve cho server
+            var localMedia = null;
+            function sendSnapshot(){
+                if (!localMedia){
+                    return;
+                }
+          
+                // Dua video vao Canvas -> Gui Frame cho Server
+                ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 300, 150);
+                // Frame type URL_base64
+                let dataURL = canvas.toDataURL('image/jpeg');
+                socket.emit('frame_Input', dataURL);
+                socket.emit('output image');
+          
+                // Nhan Output tu Server
+                socket.on('frame_Output', function (data){
+                    //Frame
+                    photo.setAttribute('src', data.img);
+                    //Class
+                    // document.getElementById('class').innerText = data.class;
+                });
+            }
+          
+          
+            // Truy cap vao webcam cua client va show len client
+            var constraints = {video: {
+                width: { min: 640 },
+                height: { min: 480 }
+            }};
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(function (stream){
+                    document.getElementById('videoElement').srcObject = stream;
+                    // thuc hien sendSnapshot theo chu ki
+                    localMedia = stream;
+                    setInterval(function () {sendSnapshot();}, 30); //CPU(ryzen7 4800h): 100ms, GPU(1660ti): 20ms
+          
+                }).catch(function (error){
+                    console.log(error);
+            });
+          });
+    </script>
+</body>
+</html>

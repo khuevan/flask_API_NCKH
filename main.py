@@ -9,7 +9,7 @@ from bson.json_util import dumps, loads
 from setting import JWT_SECRET_KEY, MONGODB_STRING, DEBUG, HOST, PORT
 from PIL import Image
 from detect_test import main, detect_cam
-from detect_video import main
+from detect_video import detect_video
 import numpy as np
 import cv2
 from flask_cors import CORS
@@ -39,6 +39,11 @@ def index():
 	# return jsonify({'msg': 'OK'})
 	return render_template('login.html')
 
+@app.route('/index')
+def home():
+	# return jsonify({'msg': 'OK'})
+	return render_template('index.html')
+
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -65,7 +70,7 @@ def login():
 		encrpted_password = hashlib.sha256(login_details['password'].encode("utf-8")).hexdigest()
 		if encrpted_password == user_from_db['password']:
 			access_token = create_access_token(identity=user_from_db['account'])
-			return jsonify(access_token=access_token), 200
+			return jsonify(status='ok', message="Logged in", access_token=access_token), 200
 
 	return jsonify({'msg': 'The username or password is incorrect'}), 401
 
@@ -77,7 +82,7 @@ def profile():
 	user_from_db = users_collection.find_one({'account' : current_user})
 	if user_from_db:
 		del user_from_db['_id'], user_from_db['password']
-		return jsonify({'profile' : user_from_db }), 200
+		return jsonify(status='ok', user=user_from_db), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
 
@@ -179,12 +184,14 @@ def predict():
 			counted=is_count,
 			model_type="Pineapple",
 			name_created=user['account'])
-		insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
+		from pprint import pprint
+		pprint(data)
+		insert_images(user['account'], data['path'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 
 		return jsonify(data), 200 
 	else:
-		return jsonify(msg='no permission'), 405
+		return jsonify(msg='no permission'), 405	
 
 
 @app.route('/api/predit_video', methods=['POST'])
@@ -200,7 +207,7 @@ def predit_video():
 	if user['permission'] > -1:
 		video_path = 'static/album-videos/' + str(datetime.now().timestamp()) + '.mp4'
 		video = video.save(video_path)
-		data = main(
+		data = detect_video(
 			video=video_path,
 			dont_show=True,
 			crop=is_cutout,
@@ -211,7 +218,7 @@ def predit_video():
 		# insert to stupid db
 		# stupid insert
 		insert_db('videos', {'account':''})
-		insert_images(user['account'], data['image'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
+		insert_images(user['account'], data['video'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'], data['video'])
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 		# from pprint import pprint
 		# pprint(data)
@@ -246,7 +253,7 @@ def getImage(input): #type('str' base64URL)
 
 @app.route('/test')
 def test():
-	return render_template('index.html')
+	return render_template('cam.html')
 
 
 if __name__ == '__main__':

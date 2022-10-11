@@ -99,8 +99,8 @@ def main(
         image_data = image_data / 255.
 
         # get image name by using split method
-        image_name = image_path.split('/')[-1]
-        image_name = image_name.split('.')[0]
+        # image_name = image_path.split('/')[-1]
+        # image_name = image_name.split('.')[0]
 
         images_data = []
         for i in range(1):
@@ -149,11 +149,11 @@ def main(
         list_bbox = {"Ripe": [], "Semi_Ripe": [], "Un_Ripe": []}
         for i in range(valid_detections.numpy()[0]):
             if int(classes.numpy()[0][i]) == 0:
-                list_bbox["Ripe"].append({"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                list_bbox["Ripe"].append({"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
             if int(classes.numpy()[0][i]) == 1:
-                list_bbox["Semi_Ripe"].append({"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                list_bbox["Semi_Ripe"].append({"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
             if int(classes.numpy()[0][i]) == 2:
-                list_bbox["Un_Ripe"].append({"id": i, "acc": scores.numpy()[0][i], "classes": int(classes.numpy()[0][i])})
+                list_bbox["Un_Ripe"].append({"id": i, "acc": float(scores.numpy()[0][i]), "classes": int(classes.numpy()[0][i])})
             else: continue
 
         # read in all class names from config
@@ -203,7 +203,7 @@ def main(
 
         username_id = name_created
         data = {"user-created" : username_id,
-                "date-reated": datetime_now(),
+                "date-created": datetime_now(),
                 "image": str(img_name) + '.png',
                 "path": path,
                 "list_box": list_bbox,

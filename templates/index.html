@@ -1,72 +1,89 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
     <meta charset="utf-8">
-	<title>Web phat hien nguoi deo khau trang</title>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/index.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-</head>
-<body>
-    <h1>Pineapple Detection</h1>
-    <video autoplay id="videoElement"></video>  <canvas id="canvasElement"></canvas>
-    <img id="photo">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+    <title>My App</title>
+
+    <style>
+        .bg-mynav {
+            background-color: #2c3e50;
+          }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-mynav">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">My App</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="fname" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                ...
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" onclick="logout()">Logout</a></li>
+              </ul>
+            </li>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid p-3">
+      <div class="card">
+        <img class="p-2" src="" id="avatar" width="200">
+        <div class="card-body">
+          <p class="card-text" id="username">...</p>
+        </div>
+      </div>
+    </div>
 
     <script>
-        $(document).ready(function (){
-            // Tao socket de connect toi server
-            let namespace = '/detect'
-            // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
-            var socket = io.connect(window.location.protocol + '//' + document.domain + ':' + location.port + namespace);
-          
-            // Tao cac bien
-            let video = document.querySelector('#videoElement');
-            let canvas = document.querySelector('#canvasElement');
-            let ctx = canvas.getContext('2d');
-            photo = document.getElementById('photo');
-          
-            // Tao funcion sendsnapshot, moi chu ki (1frame/20ms) se lay 1 frame trong video va gui ve cho server
-            var localMedia = null;
-            function sendSnapshot(){
-                if (!localMedia){
-                    return;
-                }
-          
-                // Dua video vao Canvas -> Gui Frame cho Server
-                ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 300, 150);
-                // Frame type URL_base64
-                let dataURL = canvas.toDataURL('image/jpeg');
-                socket.emit('frame_Input', dataURL);
-                socket.emit('output image');
-          
-                // Nhan Output tu Server
-                socket.on('frame_Output', function (data){
-                    //Frame
-                    photo.setAttribute('src', data.img);
-                    //Class
-                    // document.getElementById('class').innerText = data.class;
-                });
-            }
-          
-          
-            // Truy cap vao webcam cua client va show len client
-            var constraints = {video: {
-                width: { min: 640 },
-                height: { min: 480 }
-            }};
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(function (stream){
-                    document.getElementById('videoElement').srcObject = stream;
-                    // thuc hien sendSnapshot theo chu ki
-                    localMedia = stream;
-                    setInterval(function () {sendSnapshot();}, 30); //CPU(ryzen7 4800h): 100ms, GPU(1660ti): 20ms
-          
-                }).catch(function (error){
-                    console.log(error);
+        var jwt = localStorage.getItem("jwt");
+        if (jwt == null) {
+        window.location.href = './'
+        }
+
+        function loadUser() {
+          var myHeaders = new Headers();
+          myHeaders.append("Authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NTEyNzI0MiwianRpIjoiNWMxYmZhZTMtOWI1Yy00M2Q1LWE4NWQtOTBiMTM1MjRhOGJhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InRoaWVuIiwibmJmIjoxNjY1MTI3MjQyLCJleHAiOjE2NjUxMzQ0NDJ9.xpC2xQkts4LXj1iJKU6Lkn5PaEyrS_RXYVwYsGvOswA");
+    
+          var requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            redirect: 'follow'
+          };
+    
+          fetch("http://127.0.0.1:5000/user", requestOptions)
+            .then(response => response.json())
+            .then(data => {
+              console.log(data)
+              if (data["status"] == "ok") {
+                const user = data["user"]
+                document.getElementById("fname").innerHTML = user["account"];
+                document.getElementById("avatar").src = user["avatar"];
+                document.getElementById("username").innerHTML = user["account"];
+              }
             });
-          });
+        }
+
+
+        loadUser();
+
+        function logout() {
+        localStorage.removeItem("jwt");
+        window.location.href = './'
+        }
     </script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+
+  </body>
 </html>
