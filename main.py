@@ -217,8 +217,7 @@ def predit_video():
 		os.remove(video_path)
 		# insert to stupid db
 		# stupid insert
-		insert_db('videos', {'account':''})
-		insert_images(user['account'], data['video'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'], data['video'])
+		insert_db('videos', data=data)
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 		# from pprint import pprint
 		# pprint(data)
