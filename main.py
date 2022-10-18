@@ -36,13 +36,13 @@ discovery_collection = db['discovery']
 
 @app.route('/')
 def index():
-	# return jsonify({'msg': 'OK'})
-	return render_template('login.html')
+	return jsonify({'msg': 'OK'})
+	# return render_template('login.html')
 
 @app.route('/index')
 def home():
-	# return jsonify({'msg': 'OK'})
-	return render_template('index.html')
+	return jsonify({'msg': 'OK'})
+	# return render_template('index.html')
 
 
 @app.route("/register", methods=["POST"])
