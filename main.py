@@ -105,12 +105,7 @@ def album_images():
 	data = images_collection.find()
 
 	def del_item(item):
-		# for item in data:
-		del item['_id']   
-		del item['account']
-		del item['accuracy']
-		del item['class-name']
-		# print(type(data[0]))
+		del item['_id'], item['account'], item['accuracy'], item['class-name']
 		return item
 	data = [del_item(item) for item in data]
 	return jsonify(data), 200
@@ -178,7 +173,6 @@ def category(category):
 def predict():
 	images = request.files.getlist('image')
 
-	# is_count = True if request.values.get('is_count') == 'true' else False
 	is_count = request.values.get('is_count') == 'true'
 	is_cutout = request.values.get('is_cutout') == 'true'
 	current_user = get_jwt_identity()
