@@ -47,7 +47,16 @@ def home():
 
 @app.route("/register", methods=["POST"])
 def register():
-	new_user = request.get_json()
+	# new_user = request.get_json()
+	new_user = {
+		'account': request.values.get('account'),
+		'password': request.values.get('password'),
+		'avatar': request.values.get('avatar'),
+		'name': request.values.get('name'),
+		'email': request.values.get('email'),
+		'phone': request.values.get('phone') if request.values.get('account') is str else '',
+		'permission': 0
+	}
 	if new_user.account is not str:
 		raise
 
@@ -63,7 +72,11 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
-	login_details = request.get_json()
+	# login_details = request.values.to_dict()
+	login_details = {
+		'account': request.values.get('account'),
+		'password': request.values.get('password')
+	}
 	user_from_db = users_collection.find_one({'account': login_details['account']})  
 
 	if user_from_db:
