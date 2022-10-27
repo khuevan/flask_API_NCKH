@@ -354,7 +354,7 @@ components:
     UnauthorizedError:
       description: Access token is missing, invalid or has expired
     MethodNowAllowed:
-      description: No permission / Method Not Allowed
+      description: No permission | Method Not Allowed
   securitySchemes:
     bearerAuth:
       type: http
