@@ -1,7 +1,11 @@
 __pycache__
 .venv
 ignore
-static
+static/album-images
+static/album-videos
+static/crop
+static/crop_videos
+static/style.css
 .env
 venv
 templates/register.html

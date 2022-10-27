@@ -13,7 +13,7 @@ from detect_video import detect_video
 import numpy as np
 import cv2
 from flask_cors import CORS
-
+from flask_swagger_ui import get_swaggerui_blueprint
 
 
 app = Flask(__name__)
@@ -32,6 +32,17 @@ users_collection = db["users"]
 images_collection = db['images']
 videos_collection = db['videos']
 discovery_collection = db['discovery']
+
+SWAGGER_URL = '/api/docs'
+API_URL = '/static/swagger.json'
+swaggerui_blueprint = get_swaggerui_blueprint(
+	SWAGGER_URL,
+	API_URL,
+	config={
+		'app-name': "Fruit....REST-API"
+	}
+)
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 
 @app.route('/')
@@ -83,7 +94,7 @@ def login():
 		encrpted_password = hashlib.sha256(login_details['password'].encode("utf-8")).hexdigest()
 		if encrpted_password == user_from_db['password']:
 			access_token = create_access_token(identity=user_from_db['account'])
-			return jsonify(status='ok', message="Logged in", access_token=access_token), 200
+			return jsonify(access_token=access_token, message="Logged in", status='ok'), 200
 
 	return jsonify({'msg': 'The username or password is incorrect'}), 401
 
@@ -94,8 +105,8 @@ def profile():
 	current_user = get_jwt_identity()
 	user_from_db = users_collection.find_one({'account' : current_user})
 	if user_from_db:
-		del user_from_db['_id'], user_from_db['password']
-		return jsonify(status='ok', user=user_from_db), 200
+		del user_from_db['_id'], user_from_db['password'], user_from_db["permission"]
+		return jsonify(user_from_db), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
 
@@ -191,14 +202,14 @@ def predict():
 			counted=is_count,
 			model_type="Pineapple",
 			name_created=user['account'])
-		from pprint import pprint
-		pprint(data)
+		# from pprint import pprint
+		# pprint(data)
 		insert_images(user['account'], data['path'], data['date-created'], data['model_type'], data['list_box'], data['function'], data['crop_path'],data['path'])
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 
 		return jsonify(data), 200 
 	else:
-		return jsonify(msg='no permission'), 405	
+		return jsonify(msg='No permission'), 405	
 
 
 @app.route('/api/predit_video', methods=['POST'])
@@ -228,7 +239,10 @@ def predit_video():
 		del data['date-created'], data['model_type'], data['function'], data['user-created']
 		# from pprint import pprint
 		# pprint(data)
-	return jsonify(data)
+
+		return jsonify(data), 200
+	else:
+		return jsonify(msg="No permission"), 405
 
 
 def insert_db(collection, data):
