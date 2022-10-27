@@ -12,7 +12,7 @@ create file **.env**:
 ```
 HOST=0.0.0.0
 PORT=5000
-DOMAIN=0.0.0.0:5000
+DOMAIN=https://127.0.0.1:5000
 DEBUG=False 
 JWT_SECRET_KEY=scret-key
 MONGODB_STRING=mongodb_string
