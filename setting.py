@@ -8,6 +8,7 @@ load_dotenv(dotenv_path=dotenv_path)
 
 HOST = os.environ.get('HOST', '0.0.0.0')
 PORT = os.environ.get('PORT', 5000)
+DOMAIN = os.environ.get('DOMAIN')
 DEBUG = os.environ.get('DEBUG') == 'True'
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 MONGODB_STRING = os.environ.get('MONGODB_STRING', 'mongodb://localhost:27017/')
