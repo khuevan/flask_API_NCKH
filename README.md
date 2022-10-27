@@ -24,5 +24,3 @@ py main.py
 ```
 Default port: `5000`
 Swagger document page: `https://127.0.0.1:5000/api/docs`
-
-this is test string
