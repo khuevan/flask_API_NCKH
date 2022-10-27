@@ -242,7 +242,15 @@
                 "summary": "Have not done yet! .-.",
                 "security": [{
                     "bearerAuth": []
-                }]
+                }],
+                "responses": {
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "405": {
+                        "$ref": "#/components/responses/MethodNowAllowed"
+                    }
+                }
             }
         }
     },
