@@ -22,5 +22,5 @@ MONGODB_STRING=mongodb_string
 ```bash
 py main.py
 ```
-Default port: `5000`
+Default port: `5000` \n
 Swagger document page: `https://127.0.0.1:5000/api/docs`
