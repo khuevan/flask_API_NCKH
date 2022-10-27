@@ -34,7 +34,7 @@ videos_collection = db['videos']
 discovery_collection = db['discovery']
 
 SWAGGER_URL = '/api/docs'
-API_URL = '/static/swagger.json'
+API_URL = '/static/swagger.yaml'
 swaggerui_blueprint = get_swaggerui_blueprint(
 	SWAGGER_URL,
 	API_URL,

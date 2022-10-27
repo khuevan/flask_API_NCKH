@@ -241,7 +241,7 @@
                 "tags": ["Predict API"],
                 "summary": "Have not done yet! .-.",
                 "security": [{
-                    "beareAuth": []
+                    "bearerAuth": []
                 }]
             }
         }
@@ -289,7 +289,7 @@
                     },
                     "path": {
                         "type": "string",
-                        "exampe": "DOMAN/static/album-images/{fruit}-{time-stamp}.png"
+                        "example": "DOMAN/static/album-images/{fruit}-{time-stamp}.png"
                     },
                     "list_box": {
                         "type": "object",
