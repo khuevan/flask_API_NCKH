@@ -1,0 +1,484 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "description": "kvanv_ api docs _nvak\n\nhinh` nhu trai' mang cut. chua co' ...\n\n [Github](https://github.com/khuevan)",
+      "version": "1.0.0",
+      "title": "API FRUIT ........... 🍍, mangosteen"
+    },
+    "servers":[
+        {
+            "url": "http://127.0.0.1:5000/"
+        }
+    ],
+    "tags": [
+        {
+            "name": "User",
+            "description": "Authentication "
+        },
+        {
+            "name": "Discovery",
+            "description": "ugn_neiht have not done yet 🫥 🐔🐔🐤🐥🐓🐓 # db structure nhu shit"
+        },
+        {
+            "name": "Predict API",
+            "description": "API predict fruit 🥹"
+        }
+    ],
+    "paths": {
+        "/register": {
+            "post": {
+                "tags":[
+                    "User"
+                ],
+                "summary": "Create user",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data":{
+                            "schema":{
+                                "$ref": "#/components/schemas/User"
+                            }
+                        }
+                    }
+                },
+                "responses":{
+                    "201": {
+                        "description": "User created successfully"
+                    },
+                    "409": {
+                        "description": "Username already exists"
+                    }
+                }
+            }
+        },
+       "/login": {
+            "post": {
+                "tags": ["User"],
+                "summary": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "account",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "account": {
+                                        "type": "string",
+                                        "example": "thien_ngu"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "not_password"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Logged in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        },
+                                        "msg": {
+                                            "type": "string",
+                                            "example": "Logged in"
+                                        },
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The username or password is incorrect"
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get":{
+                "tags": ["User"],
+                "summary": "User infor",
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "User information",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Profile not found"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    }
+                }
+            }
+        },
+        "/api/predict_image": {
+            "post": {
+                "tags": ["Predict API"],
+                "summary": "Predict image",
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }, 
+                                    "is_count": {
+                                        "type": "boolean"
+                                    },
+                                    "is_cutout": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "405": {
+                        "$ref": "#/components/responses/MethodNowAllowed"
+                    },
+                    "200": {
+                        "description": "Im tired JUST TRY IT OUT 🥲",
+                        "content": {
+                            "multipart/form-data": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Predicted_image"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/predict_video": {
+            "post": {
+                "tags": ["Predict API"],
+                "summary":"Predict video",
+                "security": [{
+                    "bearerAuth": []
+                }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "video": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_count": {
+                                        "type": "boolean"
+                                    },
+                                    "is_cutout": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "405": {
+                        "$ref": "#/components/responses/MethodNowAllowed"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UnauthorizedError"
+                    },
+                    "200": {
+                        "description":"I hate this",
+                        "content": {
+                            "multipart/form-data": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Predicted_video"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/predict_cam": {
+            "post": {
+                "tags": ["Predict API"],
+                "summary": "Have not done yet! .-.",
+                "security": [{
+                    "beareAuth": []
+                }]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "required": [
+                    "account",
+                    "password"
+                ],
+                "type": "object",
+                "properties": {
+                    "account": {
+                        "type": "string",
+                        "example": "thien_ngu"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "not_password"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "format": "binary",
+                        "example": "path?"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "user@email.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "XXXXXXXXXX"
+                    }
+                }
+            },
+            "Predicted_image": {
+                "type": "object",
+                "properties": {
+                    "image": {
+                        "type": "string",
+                        "example":"time_stamp.png"
+                    },
+                    "path": {
+                        "type": "string",
+                        "exampe": "DOMAN/static/album-images/{fruit}-{time-stamp}.png"
+                    },
+                    "list_box": {
+                        "type": "object",
+                        "properties": {
+                            "Ripe": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": 1
+                                        },
+                                        "acc": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.8
+                                        },
+                                        "classes": {
+                                            "type": "number",
+                                            "format": "int32",
+                                            "example": 1
+                                        }
+                                    }                     
+                                },
+                                "example": [{"id": "1", "acc": 0.8, "classes": 1}, {"id": "1", "acc": 0.8, "classes": 1}]
+                            },
+                            "Semi_Ripe": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": 1
+                                        },
+                                        "acc": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.8
+                                        },
+                                        "classes": {
+                                            "type": "number",
+                                            "format": "int32",
+                                            "example": 1
+                                        }
+                                    }                     
+                                },
+                                "example": [{"id": "1", "acc": 0.99769127368927, "classes": 1}]
+                            },
+                            "Un_Ripe": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": 1
+                                        },
+                                        "acc": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.8
+                                        },
+                                        "classes": {
+                                            "type": "number",
+                                            "format": "int32",
+                                            "example": 1
+                                        }
+                                    }                     
+                                },
+                                "example": []
+                            }
+                        }
+                    },
+                    "crop_path": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["./static/crop/{time-stamp}/{Fruit}-{image-name}_{id}.png", "./static/crop/{time-stamp}/{Fruit}-{image-name}_{id}.png"]
+                    }
+                }
+            },
+            "Predicted_video": {
+                "type": "object",
+                "properties": {
+                    "video": {
+                        "type": "string",
+                        "example": "path video .mp4"
+                    },
+                    "list_box": {
+                        "type": "object",
+                        "properties": {
+                            "Ripe": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": 1
+                                        },
+                                        "acc": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.77777777
+                                        },
+                                        "classes": {
+                                            "type": "number",
+                                            "format": "int32", 
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "example": [{"id": 1, "acc": 0.7777777, "classes": 1},{"id": 1, "acc": 0.7777777, "classes": 1}]
+                            },
+                            "Semi_Ripe": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": 1
+                                        },
+                                        "acc": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.77777777
+                                        },
+                                        "classes": {
+                                            "type": "number",
+                                            "format": "int32", 
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "example": [{"id": 1, "acc": 0.7777777, "classes": 1}]
+                            },
+                            "Un_Ripe": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "example": 1
+                                        },
+                                        "acc": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0.77777777
+                                        },
+                                        "classes": {
+                                            "type": "number",
+                                            "format": "int32", 
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "example": []
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "UnauthorizedError": {
+                "description": "Access token is missing, invalid or has expired"
+            },
+            "MethodNowAllowed": {
+                "description": "No permission / Method Not Allowed"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
+    
