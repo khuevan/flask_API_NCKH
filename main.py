@@ -51,14 +51,12 @@ def register():
 	new_user = {
 		'account': request.values.get('account'),
 		'password': request.values.get('password'),
-		'avatar': request.values.get('avatar'),
+		'avatar': request.files.getlist('avatar')[0].read(),
 		'name': request.values.get('name'),
 		'email': request.values.get('email'),
 		'phone': request.values.get('phone') if request.values.get('account') is str else '',
 		'permission': 0
 	}
-	if new_user.account is not str:
-		raise
 
 	new_user["password"] = hashlib.sha256(new_user["password"].encode("utf-8")).hexdigest() 
 	# new_user.update({"name": "","permission": 0,"avatar": "","email": "","phone": ""})
