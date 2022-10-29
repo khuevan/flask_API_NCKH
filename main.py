@@ -104,6 +104,7 @@ def profile():
 	user_from_db = users_collection.find_one({'account' : current_user})
 	if user_from_db:
 		del user_from_db['_id'], user_from_db['password'], user_from_db["permission"]
+		print(user_from_db)
 		return jsonify(user_from_db), 200
 	else:
 		return jsonify({'msg': 'Profile not found'}), 404
