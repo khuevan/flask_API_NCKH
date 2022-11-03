@@ -23,3 +23,8 @@ py main.py
 ```
 Default port: `5000`<br>
 Swagger document page: [https://127.0.0.1:5000/api/docs](https://127.0.0.1:5000/api/docs)
+
+### TensorflowJs 
+
+__Model__ url:
+[http://127.0.0.1:5000/static/model/model.json](http://127.0.0.1:5000/static/model/model.json)
