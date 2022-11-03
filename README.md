@@ -28,3 +28,9 @@ Swagger document page: [https://127.0.0.1:5000/api/docs](https://127.0.0.1:5000/
 
 __Model__ url:
 [http://127.0.0.1:5000/static/model/model.json](http://127.0.0.1:5000/static/model/model.json)
+
+
+## MongoDB
+```bash
+mongorestore --verbose dump
+```
