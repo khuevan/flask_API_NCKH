@@ -22,7 +22,7 @@ MONGODB_STRING=mongodb://localhost:27017/
 py main.py
 ```
 Default port: `5000`<br>
-Swagger document page: [https://127.0.0.1:5000/api/docs](https://127.0.0.1:5000/api/docs)
+Swagger document page: [http://127.0.0.1:5000/api/docs](http://127.0.0.1:5000/api/docs)
 
 ### TensorflowJs 
 
