@@ -50,6 +50,12 @@ def index():
 	return jsonify({'msg': 'OK'})
 	# return render_template('login.html')
 
+
+@app.route('/favicon.ico')
+def favicon():
+	return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
 @app.route('/index')
 def home():
 	return jsonify({'msg': 'OK'})
@@ -274,10 +280,6 @@ def getImage(input): #type('str' base64URL)
 def test():
 	return render_template('cam.html')
 
-
-@app.route('/favicon.ico')
-def favicon():
-	return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
 	# app.run(host=HOST, port=PORT, debug=DEBUG)
