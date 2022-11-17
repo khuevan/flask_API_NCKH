@@ -1,7 +1,7 @@
 import os, io, cv2, json
 import hashlib
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
@@ -274,6 +274,10 @@ def getImage(input): #type('str' base64URL)
 def test():
 	return render_template('cam.html')
 
+
+@app.route('/favicon.ico')
+def favicon():
+	return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
 	# app.run(host=HOST, port=PORT, debug=DEBUG)
